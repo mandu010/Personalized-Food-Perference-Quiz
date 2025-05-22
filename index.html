@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Happy Food Match Quiz</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-gradient: linear-gradient(135deg, #ff6b35 0%, #ff8c42 100%);
+            --secondary-gradient: linear-gradient(135deg, #ff9a56 0%, #ffad75 100%);
+            --accent-color: #ff6b35;
+            --accent-hover: #ff8c42;
+            --text-primary: #2d3748;
+            --text-secondary: #4a5568;
+            --bg-card: #ffffff;
+            --bg-option: #f7fafc;
+            --bg-option-hover: #edf2f7;
+            --border-light: #e2e8f0;
+            --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            --border-radius: 16px;
+            --border-radius-lg: 24px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+            background: var(--primary-gradient);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .quiz-container {
+            background: var(--bg-card);
+            border-radius: var(--border-radius-lg);
+            box-shadow: var(--shadow-lg);
+            max-width: 800px;
+            width: 100%;
+            overflow: hidden;
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .header {
+            background: linear-gradient(135deg, #ff6b35 0%, #ff8c42 100%);
+            padding: 40px;
+            text-align: center;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="75" cy="75" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="50" cy="10" r="0.5" fill="rgba(255,255,255,0.1)"/><circle cx="20" cy="60" r="0.5" fill="rgba(255,255,255,0.1)"/><circle cx="80" cy="30" r="0.5" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+            opacity: 0.3;
+        }
+
+        .quiz-title {
+            font-size: 2.5em;
+            font-weight: 800;
+            margin-bottom: 12px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .quiz-subtitle {
+            font-size: 1.1em;
+            opacity: 0.9;
+            font-weight: 400;
+            position: relative;
+            z-index: 2;
+        }
+
+        .content {
+            padding: 50px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: var(--border-light);
+            border-radius: 3px;
+            margin-bottom: 40px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-color), var(--accent-hover));
+            border-radius: 3px;
+            width: 0%;
+            transition: var(--transition);
+        }
+
+        .question {
+            margin-bottom: 40px;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: slideInUp 0.6s ease-out forwards;
+        }
+
+        .question:nth-child(2) { animation-delay: 0.1s; }
+        .question:nth-child(3) { animation-delay: 0.2s; }
+        .question:nth-child(4) { animation-delay: 0.3s; }
+
+        @keyframes slideInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .question-card {
+            background: var(--bg-card);
+            border-radius: var(--border-radius);
+            padding: 32px;
+            border: 2px solid var(--border-light);
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .question-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(180deg, var(--accent-color), var(--accent-hover));
+            border-radius: 0 2px 2px 0;
+        }
+
+        .question-number {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--accent-color), var(--accent-hover));
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.9em;
+            margin-bottom: 16px;
+        }
+
+        .question h3 {
+            color: var(--text-primary);
+            font-size: 1.4em;
+            margin-bottom: 24px;
+            font-weight: 600;
+            line-height: 1.4;
+        }
+
+        .options {
+            display: grid;
+            gap: 16px;
+        }
+
+        .option {
+            background: var(--bg-option);
+            padding: 20px 24px;
+            border-radius: var(--border-radius);
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            font-weight: 500;
+            color: var(--text-primary);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .option::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .option:hover::before {
+            left: 100%;
+        }
+
+        .option:hover {
+            background: var(--bg-option-hover);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--accent-color);
+        }
+
+        .option.selected {
+            background: rgba(255, 107, 53, 0.1);
+            border-color: var(--accent-color);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .option.selected::after {
+            content: '✓';
+            position: absolute;
+            right: 20px;
+            background: var(--accent-color);
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .option input[type="radio"] {
+            margin-right: 16px;
+            transform: scale(1.2);
+            accent-color: var(--accent-color);
+        }
+
+        .option label {
+            cursor: pointer;
+            flex: 1;
+            font-size: 1em;
+        }
+
+        .submit-btn {
+            width: 100%;
+            background: linear-gradient(135deg, var(--accent-color), var(--accent-hover));
+            color: white;
+            border: none;
+            padding: 20px;
+            border-radius: var(--border-radius);
+            font-size: 1.2em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-top: 40px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--shadow-md);
+        }
+
+        .submit-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .submit-btn:hover::before {
+            left: 100%;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 20px 40px rgba(255, 107, 53, 0.4);
+        }
+
+        .submit-btn:active {
+            transform: translateY(-1px);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .result {
+            display: none;
+            background: linear-gradient(135deg, var(--accent-color), var(--accent-hover));
+            color: white;
+            padding: 40px;
+            border-radius: var(--border-radius);
+            margin-top: 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--shadow-lg);
+            animation: slideInUp 0.6s ease-out;
+        }
+
+        .result::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: repeating-linear-gradient(
+                45deg,
+                transparent,
+                transparent 10px,
+                rgba(255, 255, 255, 0.05) 10px,
+                rgba(255, 255, 255, 0.05) 20px
+            );
+            animation: shimmer 3s linear infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%) translateY(-100%); }
+            100% { transform: translateX(100%) translateY(100%); }
+        }
+
+        .result-emoji {
+            font-size: 4em;
+            margin-bottom: 20px;
+            display: block;
+            animation: bounce 1s ease-out;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+
+        .result h3 {
+            font-size: 2em;
+            margin-bottom: 16px;
+            font-weight: 800;
+            position: relative;
+            z-index: 2;
+        }
+
+        .result p {
+            font-size: 1.2em;
+            line-height: 1.6;
+            margin-bottom: 30px;
+            position: relative;
+            z-index: 2;
+            opacity: 0.95;
+        }
+
+        .restart-btn {
+            background: white;
+            color: var(--accent-color);
+            border: 2px solid white;
+            padding: 14px 28px;
+            border-radius: 50px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+            z-index: 2;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 0.9em;
+        }
+
+        .restart-btn:hover {
+            background: transparent;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(255, 255, 255, 0.3);
+        }
+
+        .food-icons {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 2em;
+            opacity: 0.1;
+            pointer-events: none;
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                padding: 30px;
+            }
+            
+            .header {
+                padding: 30px;
+            }
+            
+            .quiz-title {
+                font-size: 2em;
+            }
+            
+            .quiz-subtitle {
+                font-size: 1em;
+            }
+            
+            .question-card {
+                padding: 24px;
+            }
+            
+            .question h3 {
+                font-size: 1.2em;
+            }
+            
+            .option {
+                padding: 16px 20px;
+            }
+            
+            .submit-btn {
+                padding: 16px;
+                font-size: 1.1em;
+            }
+            
+            .result {
+                padding: 30px;
+            }
+            
+            .result h3 {
+                font-size: 1.6em;
+            }
+            
+            .result p {
+                font-size: 1.1em;
+            }
+        }
+
+        /* Loading animation */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+            margin-left: 10px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="quiz-container">
+        <div class="header">
+            <div class="food-icons">🍽️✨</div>
+            <h1 class="quiz-title">What's Your Happy Food?</h1>
+            <p class="quiz-subtitle">Discover the perfect foods that match your personality and boost your mood</p>
+        </div>
+        
+        <div class="content">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            
+            <div class="question">
+                <div class="question-card">
+                    <div class="question-number">1</div>
+                    <h3>How do you like to start your day?</h3>
+                    <div class="options">
+                        <div class="option" onclick="selectOption(this, 'q1', 'A')">
+                            <input type="radio" name="q1" value="A" id="q1a">
+                            <label for="q1a">With a hearty, filling breakfast that energizes me</label>
+                        </div>
+                        <div class="option" onclick="selectOption(this, 'q1', 'B')">
+                            <input type="radio" name="q1" value="B" id="q1b">
+                            <label for="q1b">With something light and refreshing to awaken my senses</label>
+                        </div>
+                        <div class="option" onclick="selectOption(this, 'q1', 'C')">
+                            <input type="radio" name="q1" value="C" id="q1c">
+                            <label for="q1c">With a comforting, warm treat that feels like a hug</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="question">
+                <div class="question-card">
+                    <div class="question-number">2</div>
+                    <h3>Which ingredient sparks the most joy for you?</h3>
+                    <div class="options">
+                        <div class="option" onclick="selectOption(this, 'q2', 'A')">
+                            <input type="radio" name="q2" value="A" id="q2a">
+                            <label for="q2a">Rich dark chocolate or crunchy nuts</label>
+                        </div>
+                        <div class="option" onclick="selectOption(this, 'q2', 'B')">
+                            <input type="radio" name="q2" value="B" id="q2b">
+                            <label for="q2b">Fresh seasonal fruits or zesty citrus</label>
+                        </div>
+                        <div class="option" onclick="selectOption(this, 'q2', 'C')">
+                            <input type="radio" name="q2" value="C" id="q2c">
+                            <label for="q2c">Wholesome grains or aromatic spices</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="question">
+                <div class="question-card">
+                    <div class="question-number">3</div>
+                    <h3>When you're feeling low, what type of food do you crave?</h3>
+                    <div class="options">
+                        <div class="option" onclick="selectOption(this, 'q3', 'A')">
+                            <input type="radio" name="q3" value="A" id="q3a">
+                            <label for="q3a">Rich, nourishing foods like fatty fish or avocado</label>
+                        </div>
+                        <div class="option" onclick="selectOption(this, 'q3', 'B')">
+                            <input type="radio" name="q3" value="B" id="q3b">
+                            <label for="q3b">A cool, crisp salad or refreshing smoothie</label>
+                        </div>
+                        <div class="option" onclick="selectOption(this, 'q3', 'C')">
+                            <input type="radio" name="q3" value="C" id="q3c">
+                            <label for="q3c">A warm, traditional dish that soothes your soul</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <button class="submit-btn" onclick="showResult()" id="submitBtn">
+                Discover My Food Match!
+            </button>
+
+            <div id="result" class="result">
+                <span class="result-emoji" id="resultEmoji">🎉</span>
+                <h3 id="resultText">Your Happy Food Match!</h3>
+                <p id="resultDesc"></p>
+                <button class="restart-btn" onclick="restartQuiz()">Take Quiz Again</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let answeredQuestions = 0;
+        
+        function updateProgress() {
+            const progress = (answeredQuestions / 3) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+        }
+        
+        function selectOption(element, questionName, value) {
+            // Check if this question was already answered
+            const wasAnswered = document.querySelector(`input[name="${questionName}"]:checked`) !== null;
+            
+            // Remove selected class from all options in this question
+            const questionOptions = element.closest('.question').querySelectorAll('.option');
+            questionOptions.forEach(opt => opt.classList.remove('selected'));
+            
+            // Add selected class to clicked option
+            element.classList.add('selected');
+            
+            // Check the radio button
+            element.querySelector('input[type="radio"]').checked = true;
+            
+            // Update progress if this is a new answer
+            if (!wasAnswered) {
+                answeredQuestions++;
+                updateProgress();
+            }
+            
+            // Enable submit button if all questions answered
+            const submitBtn = document.getElementById('submitBtn');
+            if (answeredQuestions === 3) {
+                submitBtn.style.opacity = '1';
+                submitBtn.disabled = false;
+            }
+        }
+
+        function showResult() {
+            let a = 0, b = 0, c = 0;
+            
+            // Count votes
+            document.querySelectorAll('input[type="radio"]:checked').forEach(input => {
+                if (input.value === 'A') a++;
+                else if (input.value === 'B') b++;
+                else if (input.value === 'C') c++;
+            });
+            
+            if (a + b + c < 3) {
+                // Add shake animation to unfilled questions
+                document.querySelectorAll('.question').forEach(question => {
+                    const hasAnswer = question.querySelector('input[type="radio"]:checked');
+                    if (!hasAnswer) {
+                        question.style.animation = 'shake 0.5s ease-in-out';
+                        setTimeout(() => {
+                            question.style.animation = '';
+                        }, 500);
+                    }
+                });
+                return;
+            }
+            
+            // Show loading state
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.innerHTML = 'Analyzing Your Preferences<span class="loading"></span>';
+            
+            setTimeout(() => {
+                let result = '';
+                let emoji = '';
+                
+                if (a >= b && a >= c) {
+                    emoji = '🍫🐟';
+                    result = 'Rich & Indulgent Foods: Your soul craves rich, nourishing foods that satisfy deeply. Think mood-boosting omega-3 rich salmon, antioxidant-packed dark chocolate, and creamy avocados that fuel both body and spirit.';
+                } else if (b >= a && b >= c) {
+                    emoji = '🍋🥗';
+                    result = 'Fresh & Zesty Flavors: You\'re energized by vibrant, fresh flavors that awaken your senses. Citrus fruits, crisp vegetables, and refreshing smoothies are your natural mood lifters and energy boosters.';
+                } else {
+                    emoji = '🍲🌾';
+                    result = 'Comfort & Warmth Foods: You find happiness in foods that comfort and ground you. Warm, wholesome dishes like aromatic dal, hearty whole grains, and traditional recipes that connect you to home and heritage.';
+                }
+                
+                document.getElementById('resultEmoji').textContent = emoji;
+                document.getElementById('resultText').textContent = 'Your Happy Food Match!';
+                document.getElementById('resultDesc').textContent = result;
+                document.getElementById('result').style.display = 'block';
+                
+                // Reset button
+                submitBtn.innerHTML = 'Discover My Food Match!';
+                
+                // Scroll to result
+                document.getElementById('result').scrollIntoView({ behavior: 'smooth' });
+            }, 2000);
+        }
+        
+        function restartQuiz() {
+            // Reset selections
+            document.querySelectorAll('.option').forEach(opt => opt.classList.remove('selected'));
+            document.querySelectorAll('input[type="radio"]').forEach(input => input.checked = false);
+            
+            // Reset progress
+            answeredQuestions = 0;
+            updateProgress();
+            
+            // Disable submit button
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.style.opacity = '0.6';
+            submitBtn.disabled = true;
+            
+            // Hide result
+            document.getElementById('result').style.display = 'none';
+            
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        
+        // Add shake animation for validation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes shake {
+                0%, 100% { transform: translateX(0); }
+                25% { transform: translateX(-5px); }
+                75% { transform: translateX(5px); }
+            }
+        `;
+        document.head.appendChild(style);
+        
+        // Initialize
+        updateProgress();
+    </script>
+</body>
+</html>
